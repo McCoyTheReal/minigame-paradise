@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Box - Sum 10</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <button id="home-btn" class="icon-btn" onclick="location.href='../index.html'">🏠</button>
+            <h1>Fruit Box 🍎</h1>
+            <div class="score-board">
+                <div class="score-item">
+                    <span class="label">TIME</span>
+                    <span id="timer">100</span>
+                </div>
+                <div class="score-item">
+                    <span class="label">SCORE</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="label">BEST</span>
+                    <span id="best-score">0</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="reset-btn" class="icon-btn">🔄</button>
+                <button id="mute-btn" class="icon-btn">🔊</button>
+            </div>
+        </header>
+
+        <div id="canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+            <div id="message-overlay" class="hidden">
+                <div class="message-content">
+                    <h2 id="message-title">Good Job!</h2>
+                    <p id="message-text">Board Cleared</p>
+                    <button id="continue-btn">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Drag to select apples. Sum must be 10.</p>
+        </footer>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
