@@ -137,17 +137,35 @@ function addHistory(guess, result) {
     const item = document.createElement('div');
     item.className = 'history-item';
 
-    // Determine Out text
+    // Determine Out
     const isOut = result.strikes === 0 && result.balls === 0;
+
+    // Create LED HTML
+    // Strike LEDs (up to 3 slots?) usually history just shows count. 
+    // User asked for "lights turning on". 
+    // Let's make 3 dots for S, 3 dots for B, 1 dot for O.
+    // Fill them based on count.
+
+    const getLeds = (count, max, cls) => {
+        let html = '';
+        for (let i = 0; i < max; i++) {
+            const on = i < count ? 'on' : '';
+            html += `<span class="${cls} ${on}"></span>`;
+        }
+        return html;
+    };
+
+    const sLeds = getLeds(result.strikes, 3, 's');
+    const bLeds = getLeds(result.balls, 3, 'b'); // Max 3 balls visible usually sufficient
+    const oLed = `<span class="o ${isOut ? 'on' : ''}"></span>`;
 
     item.innerHTML = `
         <span>${guess}</span>
-        <span class="s">${result.strikes}</span>
-        <span class="b">${result.balls}</span>
-        <span class="o">${isOut ? 1 : 0}</span>
+        <div style="display:flex; gap:2px; justify-content:center;">${sLeds}</div>
+        <div style="display:flex; gap:2px; justify-content:center;">${bLeds}</div>
+        <div style="display:flex; justify-content:center;">${oLed}</div>
     `;
-    // Prepend to show newest first? Or Append? Append is standard log.
-    // Let's Prepend to keep it near top
+
     historyList.prepend(item);
 }
 

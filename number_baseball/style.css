@@ -41,7 +41,29 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background: #000;
+    background: url('bg.png') no-repeat center center;
+    background-size: cover;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) inset;
+}
+
+#game-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    /* Dim the bright stadium lights */
+    z-index: 0;
+}
+
+header,
+main,
+#input-area {
+    position: relative;
+    z-index: 1;
 }
 
 header {
@@ -142,20 +164,35 @@ h1 {
     background: rgba(255, 255, 255, 0.05);
 }
 
-.s {
-    color: var(--strike);
-    text-shadow: 0 0 3px var(--strike);
-}
-
-.b {
-    color: var(--ball);
-    text-shadow: 0 0 3px var(--ball);
-}
-
+.s,
+.b,
 .o {
-    color: var(--out);
-    text-shadow: 0 0 3px var(--out);
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #333;
+    /* Off state */
+    margin: 0 auto;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.8);
 }
+
+.s.on {
+    background: var(--strike);
+    box-shadow: 0 0 10px var(--strike);
+}
+
+.b.on {
+    background: var(--ball);
+    box-shadow: 0 0 10px var(--ball);
+}
+
+.o.on {
+    background: var(--out);
+    box-shadow: 0 0 10px var(--out);
+}
+
+/* Remove text shadows from class directly, applied via 'on' */
 
 #input-area {
     margin-top: 20px;
