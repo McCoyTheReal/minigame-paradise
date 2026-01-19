@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Run 🦖</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <button id="home-btn" class="icon-btn" onclick="location.href='../index.html'">🏠</button>
+            <div class="score-board">
+                <span class="label">SCORE</span>
+                <span id="score">0</span>
+            </div>
+            <div class="score-board">
+                <span class="label">HI</span>
+                <span id="high-score">0</span>
+            </div>
+        </header>
+
+        <canvas id="game-canvas"></canvas>
+
+        <div id="message-overlay">
+            <div class="message-content">
+                <h2>Dino Run 🦖</h2>
+                <p>Press SPACE or Tap to Jump</p>
+                <button id="start-btn">START</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Avoid the Cactuses! 🌵</p>
+        </footer>
+    </div>
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>

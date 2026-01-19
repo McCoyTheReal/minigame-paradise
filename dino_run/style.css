@@ -1,0 +1,109 @@
+:root {
+    --bg-color: #f7f1e3;
+    --ground-color: #d2dae2;
+    --text-color: #2c2c54;
+    --accent-color: #ff5252;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Fredoka One', cursive;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.icon-btn {
+    background: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.score-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.label {
+    font-size: 10px;
+    color: #84817a;
+}
+
+#score,
+#high-score {
+    font-size: 24px;
+}
+
+#game-canvas {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    display: block;
+}
+
+#message-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#start-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-family: 'Fredoka One', cursive;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 0 #b33939;
+    transition: transform 0.1s;
+}
+
+#start-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
