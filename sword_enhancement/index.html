@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sword Enhancement ⚔️</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <button id="home-btn" class="icon-btn" onclick="location.href='../index.html'">🏠</button>
+            <h1>SWORD ENHANCE</h1>
+            <div id="money-display">
+                <span class="label">GOLD:</span>
+                <span id="gold-amount">1,000</span>
+            </div>
+        </header>
+
+        <main>
+            <div id="sword-display">
+                <div id="sword-glow"></div>
+                <div id="sword-icon">💨</div>
+                <div id="sword-info">
+                    <span id="sword-name">No Sword</span>
+                    <span id="sword-level"></span>
+                </div>
+            </div>
+
+            <div id="stats-panel">
+                <div class="stat">
+                    <span class="label">Success:</span>
+                    <span id="success-rate">-%</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Sell Price:</span>
+                    <span id="sell-price">0G</span>
+                </div>
+            </div>
+
+            <div id="log-container">
+                <div id="log-list">
+                    <p class="system">Buy a +0 Twig to start!</p>
+                </div>
+            </div>
+        </main>
+
+        <div id="action-area">
+            <button id="enhance-btn" class="game-btn disabled">ENHANCE <span id="enhance-cost"></span></button>
+            <div id="sub-actions">
+                <button id="buy-btn" class="game-btn secondary">BUY TWIG (100G)</button>
+                <button id="sell-btn" class="game-btn secondary disabled">SELL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals/Overlays -->
+    <div id="overlay" class="overlay hidden">
+        <div class="overlay-content">
+            <h2 id="overlay-title">GAME OVER</h2>
+            <p id="overlay-text">You lost everything.</p>
+            <button id="restart-btn" class="game-btn">RESTART</button>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
