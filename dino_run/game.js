@@ -6,9 +6,9 @@ const overlay = document.getElementById('message-overlay');
 const startBtn = document.getElementById('start-btn');
 
 // Game Constants
-let GRAVITY = 0.6;
-let JUMP_FORCE = -10; // slightly lower because we scale
-let SPEED = 5;
+let GRAVITY = 0.5;
+let JUMP_FORCE = -12;
+let SPEED = 4; // Slower start
 let GAME_SPEED_INC = 0.001;
 
 // State
@@ -40,6 +40,12 @@ function resize() {
 }
 
 function spawnObstacle() {
+    // Prevent spawning too close to the last obstacle
+    if (obstacles.length > 0) {
+        let lastObs = obstacles[obstacles.length - 1];
+        if (canvas.width - lastObs.x < 300) return;
+    }
+
     const type = Math.random() > 0.5 ? '🌵' : '🌴';
     obstacles.push({
         x: canvas.width,
@@ -80,30 +86,33 @@ function update() {
         }
     }
 
-    // Draw Dino
+    // Draw Dino (Flipped to face right)
+    ctx.save();
     ctx.font = '40px serif';
-    ctx.fillText(dino.icon, dino.x, dino.y + 40);
+    ctx.translate(dino.x + 40, dino.y); // Move to the dino's right edge
+    ctx.scale(-1, 1); // Flip horizontally
+    ctx.fillText(dino.icon, 0, 40);
+    ctx.restore();
 
     // Obstacles
-    if (frame % Math.floor(1000 / (gameSpeed * 10)) === 0 || frame === 1) {
-        // Random space between obstacles
-        if (Math.random() < 0.5 && frame > 60) spawnObstacle();
+    // Reduce spawn frequency and add randomness
+    if (frame % 80 === 0) {
+        if (Math.random() > 0.4) spawnObstacle();
     }
-    // Assurance spawn
-    if (frame % 150 === 0) spawnObstacle();
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i];
         obs.x -= gameSpeed;
 
         // Draw Obstacle
+        ctx.font = '40px serif';
         ctx.fillText(obs.type, obs.x, obs.y + 40);
 
-        // Collision
+        // Collision (Slightly more forgiving hitboxes)
         if (
-            dino.x < obs.x + obs.w - 10 &&
-            dino.x + dino.w - 10 > obs.x &&
-            dino.y < obs.y + obs.h - 10 &&
+            dino.x + 10 < obs.x + obs.w - 10 &&
+            dino.x + dino.w - 15 > obs.x &&
+            dino.y + 10 < obs.y + obs.h - 10 &&
             dino.y + dino.h - 10 > obs.y
         ) {
             gameOver();
@@ -115,7 +124,7 @@ function update() {
             score++;
             scoreEl.innerText = score;
             if (score % 10 === 0) {
-                gameSpeed += 0.5;
+                gameSpeed += 0.2; // Slower speed increase
                 audio.score();
             }
         }

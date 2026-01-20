@@ -40,87 +40,84 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    background: url('bg.png') no-repeat center center;
-    background-size: cover;
+    background: #000;
     position: relative;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) inset;
-}
-
-#game-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    /* Dim the bright stadium lights */
-    z-index: 0;
-}
-
-header,
-main,
-#input-area {
-    position: relative;
-    z-index: 1;
+    overflow: hidden;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: #000;
+    z-index: 10;
 }
 
-h1 {
-    font-family: 'Black Ops One', cursive;
-    font-size: 24px;
-    color: var(--led-green);
-    text-shadow: 0 0 10px rgba(57, 211, 83, 0.5);
-    margin: 0;
+#game-scene {
+    width: 100%;
+    height: 250px;
+    /* Fixed height for character action */
+    background: url('bg.png') no-repeat center center;
+    background-size: cover;
+    position: relative;
+    flex-shrink: 0;
 }
 
-.icon-btn {
-    background: rgba(33, 38, 45, 0.8);
-    border: 1px solid #30363d;
-    color: var(--text-color);
-    font-size: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
-    cursor: pointer;
+#game-scene::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+#ui-dashboard {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background: #0d1117;
+    border-top: 2px solid #30363d;
+    overflow-y: auto;
 }
 
 #scoreboard {
-    flex: 1;
-    background: rgba(22, 27, 34, 0.85);
-    border: 2px solid #30363d;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #30363d;
     border-radius: 10px;
-    padding: 15px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-    overflow: hidden;
+    margin-bottom: 15px;
 }
 
 #inning-display {
-    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 10px;
-    color: #8b949e;
+}
+
+#inning-display .label {
+    font-size: 14px;
+    color: var(--led-yellow);
 }
 
 .led-text {
-    font-size: 24px;
+    font-size: 32px;
     color: var(--led-red);
     font-family: 'Black Ops One', cursive;
-    text-shadow: 0 0 5px var(--led-red);
+    text-shadow: 0 0 10px var(--led-red);
 }
 
 #message-board {
     width: 100%;
-    background: #000;
+    background: rgba(0, 0, 0, 0.6);
     color: var(--led-green);
     padding: 10px;
     text-align: center;
@@ -131,94 +128,86 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: inset 0 0 5px rgba(57, 211, 83, 0.3);
 }
 
 #history-container {
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    border-top: 1px solid #30363d;
+    scrollbar-width: none;
 }
 
-.history-header {
+#history-container::-webkit-scrollbar {
     display: none;
-    /* Hide header, self-explanatory with labels */
 }
 
 .history-item {
     display: flex;
-    /* Flex layout */
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
-    font-size: 18px;
-    border-bottom: 1px solid #30363d;
-    background: rgba(0, 0, 0, 0.2);
-    margin-bottom: 5px;
-    border-radius: 5px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid var(--led-yellow);
 }
 
 .history-guess {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
-    color: var(--led-yellow);
-    letter-spacing: 5px;
-    font-family: 'Share Tech Mono', monospace;
-    text-shadow: 0 0 5px rgba(210, 153, 34, 0.5);
+    color: #fff;
+    letter-spacing: 4px;
 }
 
 .history-details {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    min-width: 80px;
 }
 
 .detail-row {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .detail-label {
-    font-size: 12px;
-    width: 15px;
+    font-size: 14px;
     font-weight: bold;
+    width: 15px;
     text-align: center;
-    opacity: 0.8;
 }
 
 .leds {
     display: flex;
-    gap: 3px;
+    gap: 4px;
 }
 
 .s,
 .b,
 .o {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: #333;
-    /* Off state */
-    margin: 0 auto;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.8);
+    background: #222;
+    box-shadow: inset 0 0 4px #000;
 }
 
 .s.on {
     background: var(--strike);
-    box-shadow: 0 0 10px var(--strike);
+    box-shadow: 0 0 8px var(--strike);
 }
 
 .b.on {
     background: var(--ball);
-    box-shadow: 0 0 10px var(--ball);
+    box-shadow: 0 0 8px var(--ball);
 }
 
 .o.on {
     background: var(--out);
-    box-shadow: 0 0 10px var(--out);
+    box-shadow: 0 0 8px var(--out);
 }
 
 /* Remove text shadows from class directly, applied via 'on' */

@@ -19,40 +19,45 @@
             <button id="help-btn" class="icon-btn">❓</button>
         </header>
 
-        <main id="scoreboard">
-            <div id="inning-display">
-                <span class="label">INNING</span>
-                <span id="current-inning" class="led-text">1</span>
-                <span class="label">/ 9</span>
-            </div>
+        <div id="game-scene">
+            <!-- Game background and animations here -->
+        </div>
 
-            <div id="message-board">
-                <p id="game-message">PLAY BALL!</p>
-            </div>
-
-            <div id="history-container">
-                <!-- Guesses will appear here -->
-                <div id="history-list">
-                    <!-- Example: Item -->
+        <div id="ui-dashboard">
+            <main id="scoreboard">
+                <div id="inning-display">
+                    <span class="label">INNING</span>
+                    <span id="current-inning" class="led-text">1</span>
+                    <span class="label">/ 9</span>
                 </div>
-            </div>
-        </main>
 
-        <div id="input-area">
-            <input type="text" id="guess-input" maxlength="3" readonly placeholder="_ _ _">
-            <div id="keypad">
-                <button class="key">1</button>
-                <button class="key">2</button>
-                <button class="key">3</button>
-                <button class="key">4</button>
-                <button class="key">5</button>
-                <button class="key">6</button>
-                <button class="key">7</button>
-                <button class="key">8</button>
-                <button class="key">9</button>
-                <button class="key action" id="clear-btn">C</button>
-                <button class="key">0</button>
-                <button class="key action" id="enter-btn">↵</button>
+                <div id="message-board">
+                    <p id="game-message">PLAY BALL!</p>
+                </div>
+
+                <div id="history-container">
+                    <div id="history-list">
+                        <!-- Example: Item -->
+                    </div>
+                </div>
+            </main>
+
+            <div id="input-area">
+                <input type="text" id="guess-input" maxlength="3" readonly placeholder="_ _ _">
+                <div id="keypad">
+                    <button class="key">1</button>
+                    <button class="key">2</button>
+                    <button class="key">3</button>
+                    <button class="key">4</button>
+                    <button class="key">5</button>
+                    <button class="key">6</button>
+                    <button class="key">7</button>
+                    <button class="key">8</button>
+                    <button class="key">9</button>
+                    <button class="key action" id="clear-btn">C</button>
+                    <button class="key">0</button>
+                    <button class="key action" id="enter-btn">↵</button>
+                </div>
             </div>
         </div>
 
