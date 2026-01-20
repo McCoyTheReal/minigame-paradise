@@ -28,6 +28,7 @@ let dino = {
     dy: 0,
     isJumping: false,
     grounded: false,
+    jumpCount: 0,
     icon: '🦖'
 };
 
@@ -83,6 +84,7 @@ function update() {
             dino.dy = 0;
             dino.isJumping = false;
             dino.grounded = true;
+            dino.jumpCount = 0; // Reset jump count
         }
     }
 
@@ -133,10 +135,12 @@ function update() {
 
 function jump() {
     if (!isPlaying) return;
-    if (!dino.isJumping) {
+    // Allow jump if grounded OR if jumpCount < 2 (Double jump)
+    if (dino.jumpCount < 2) {
         dino.dy = JUMP_FORCE;
         dino.isJumping = true;
         dino.grounded = false;
+        dino.jumpCount++;
         audio.jump();
     }
 }
