@@ -54,7 +54,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.4);
     /* Dim the bright stadium lights */
     z-index: 0;
 }
@@ -82,7 +82,7 @@ h1 {
 }
 
 .icon-btn {
-    background: #21262d;
+    background: rgba(33, 38, 45, 0.8);
     border: 1px solid #30363d;
     color: var(--text-color);
     font-size: 20px;
@@ -94,7 +94,7 @@ h1 {
 
 #scoreboard {
     flex: 1;
-    background: var(--board-color);
+    background: rgba(22, 27, 34, 0.85);
     border: 2px solid #30363d;
     border-radius: 10px;
     padding: 15px;
@@ -142,26 +142,55 @@ h1 {
 }
 
 .history-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    text-align: center;
-    padding: 5px 0;
-    border-bottom: 1px dashed #30363d;
-    color: #8b949e;
-    font-size: 12px;
+    display: none;
+    /* Hide header, self-explanatory with labels */
 }
 
 .history-item {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    text-align: center;
-    padding: 8px 0;
+    display: flex;
+    /* Flex layout */
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
     font-size: 18px;
-    border-bottom: 1px solid #21262d;
+    border-bottom: 1px solid #30363d;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 5px;
+    border-radius: 5px;
 }
 
-.history-item:last-child {
-    background: rgba(255, 255, 255, 0.05);
+.history-guess {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--led-yellow);
+    letter-spacing: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    text-shadow: 0 0 5px rgba(210, 153, 34, 0.5);
+}
+
+.history-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-label {
+    font-size: 12px;
+    width: 15px;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.leds {
+    display: flex;
+    gap: 3px;
 }
 
 .s,

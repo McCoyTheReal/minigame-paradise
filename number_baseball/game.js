@@ -160,10 +160,21 @@ function addHistory(guess, result) {
     const oLed = `<span class="o ${isOut ? 'on' : ''}"></span>`;
 
     item.innerHTML = `
-        <span>${guess}</span>
-        <div style="display:flex; gap:2px; justify-content:center;">${sLeds}</div>
-        <div style="display:flex; gap:2px; justify-content:center;">${bLeds}</div>
-        <div style="display:flex; justify-content:center;">${oLed}</div>
+        <div class="history-guess">${guess}</div>
+        <div class="history-details">
+            <div class="detail-row">
+                <span class="detail-label" style="color:var(--strike)">S</span>
+                <div class="leds">${sLeds}</div>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label" style="color:var(--ball)">B</span>
+                <div class="leds">${bLeds}</div>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label" style="color:var(--out)">O</span>
+                <div class="leds">${oLed}</div>
+            </div>
+        </div>
     `;
 
     historyList.prepend(item);
