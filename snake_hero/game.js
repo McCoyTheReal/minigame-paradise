@@ -27,6 +27,14 @@ let player = null;
 let lastTime = 0;
 let audio = new GameAudio();
 
+// Mobile Control Elements
+const joystickContainer = document.getElementById('joystick-container');
+const joystickBase = document.getElementById('joystick-base');
+const joystickKnob = document.getElementById('joystick-knob');
+const boostBtn = document.getElementById('boost-btn');
+
+let joystickData = { active: false, x: 0, y: 0, angle: 0 };
+
 class Snake {
     constructor(id, name, color, isPlayer = false) {
         this.id = id;
@@ -68,8 +76,13 @@ class Snake {
 
         // Direction logic
         if (this.isPlayer) {
-            // Use window size for centering logic
-            const targetAngle = Math.atan2(mouse.y - window.innerHeight / 2, mouse.x - window.innerWidth / 2);
+            let targetAngle;
+            if (joystickData.active) {
+                targetAngle = joystickData.angle;
+            } else {
+                targetAngle = Math.atan2(mouse.y - window.innerHeight / 2, mouse.x - window.innerWidth / 2);
+            }
+
             let diff = targetAngle - this.angle;
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
@@ -395,26 +408,90 @@ window.addEventListener('mouseup', () => { if (player) player.isBoosting = false
 startBtn.addEventListener('click', startGame);
 window.addEventListener('resize', resize);
 
-// Mobile touch handling - Use window to ensure capture
+// Joystick Logic
+function handleJoystick(e) {
+    if (!joystickData.active) return;
+
+    const touch = Array.from(e.touches).find(t => t.target.closest('#joystick-container'));
+    if (!touch) return;
+
+    const rect = joystickBase.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    let dx = touch.clientX - centerX;
+    let dy = touch.clientY - centerY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = rect.width / 2;
+
+    if (dist > maxDist) {
+        dx *= maxDist / dist;
+        dy *= maxDist / dist;
+    }
+
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    joystickData.angle = Math.atan2(dy, dx);
+}
+
+// Global Touch Listeners
 window.addEventListener('touchstart', (e) => {
-    if (e.touches && e.touches[0]) {
+    // Check for joystick
+    if (e.target.closest('#joystick-container')) {
+        joystickData.active = true;
+        handleJoystick(e);
+    }
+
+    // Check for boost button
+    if (e.target.closest('#boost-btn')) {
+        if (player) player.isBoosting = true;
+        boostBtn.style.transform = 'scale(0.9)';
+    }
+
+    // Traditional touch-anywhere fallback (optional, but good for UI)
+    if (!joystickData.active && !e.target.closest('#boost-btn') && !e.target.closest('button')) {
         mouse.x = e.touches[0].clientX;
         mouse.y = e.touches[0].clientY;
     }
-    if (player) player.isBoosting = true;
 }, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
-    if (e.touches && e.touches[0]) {
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
+    if (joystickData.active) {
+        handleJoystick(e);
     }
-    // Only prevent default if playing to allow UI interaction in overlay
-    if (isPlaying) e.preventDefault();
+
+    if (!joystickData.active && !isPlaying && e.target.closest('.overlay')) {
+        // Allow scrolling in overlay if not active
+    } else {
+        if (isPlaying) e.preventDefault();
+    }
+
+    if (!joystickData.active && !e.target.closest('#boost-btn')) {
+        if (e.touches && e.touches[0]) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    }
 }, { passive: false });
 
-window.addEventListener('touchend', () => {
-    if (player) player.isBoosting = false;
+window.addEventListener('touchend', (e) => {
+    if (joystickData.active) {
+        const touch = Array.from(e.touches).find(t => t.target.closest('#joystick-container'));
+        if (!touch) {
+            joystickData.active = false;
+            joystickKnob.style.transform = `translate(0px, 0px)`;
+        }
+    }
+
+    // Check for boost button end
+    // Since touchend doesn't have target easily, we check if player.isBoosting was true
+    if (player && player.isBoosting) {
+        // Simple logic: if no touches are on the boost btn anymore
+        const boostTouch = Array.from(e.touches).find(t => t.target.closest('#boost-btn'));
+        if (!boostTouch) {
+            player.isBoosting = false;
+            boostBtn.style.transform = 'scale(1)';
+        }
+    }
 });
 
 // Initialization

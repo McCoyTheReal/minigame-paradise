@@ -221,8 +221,8 @@ header {
 
 #boost-btn {
     position: absolute;
-    bottom: 60px;
-    right: 200px;
+    bottom: 40px;
+    right: 40px;
     width: 80px;
     height: 80px;
     background: var(--neon-pink);
@@ -230,9 +230,9 @@ header {
     border-radius: 50%;
     color: #fff;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     box-shadow: 0 0 15px var(--neon-pink);
-    z-index: 10;
+    z-index: 100;
 }
 
 .hidden {
