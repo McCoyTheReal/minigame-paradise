@@ -374,10 +374,23 @@ window.addEventListener('mouseup', () => { if (player) player.isBoosting = false
 startBtn.addEventListener('click', startGame);
 window.addEventListener('resize', resize);
 
-// Mobile touch handling for boost
+// Mobile touch handling
 canvas.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches[0]) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }
     if (player) player.isBoosting = true;
 }, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches[0]) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }
+    e.preventDefault(); // Prevent scrolling while playing
+}, { passive: false });
+
 canvas.addEventListener('touchend', () => {
     if (player) player.isBoosting = false;
 });
