@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris 🧱</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <button id="home-btn" class="icon-btn" onclick="location.href='../index.html'">🏠</button>
+            <h1>TETRIS</h1>
+            <div id="status-bar">
+                <div class="stat-item">
+                    <span class="label">LEVEL</span>
+                    <span id="level-val">1</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div id="tetris-board-container">
+                <canvas id="tetris-canvas"></canvas>
+                <div id="message-overlay" class="overlay hidden">
+                    <div class="overlay-content">
+                        <h2 id="overlay-title">GAME OVER</h2>
+                        <button id="start-btn">START</button>
+                    </div>
+                </div>
+            </div>
+
+            <aside id="side-panel">
+                <div class="side-block">
+                    <h3>NEXT</h3>
+                    <canvas id="next-canvas"></canvas>
+                </div>
+                <div class="side-block">
+                    <h3>SCORE</h3>
+                    <div id="score-val" class="lcd-text">0</div>
+                </div>
+                <div class="side-block">
+                    <h3>LINES</h3>
+                    <div id="lines-val" class="lcd-text">0</div>
+                </div>
+            </aside>
+        </main>
+
+        <div id="controls">
+            <div class="control-row">
+                <button id="btn-rotate" class="ctrl-btn">🔄</button>
+            </div>
+            <div class="control-row">
+                <button id="btn-left" class="ctrl-btn">◀️</button>
+                <button id="btn-down" class="ctrl-btn">🔽</button>
+                <button id="btn-right" class="ctrl-btn">▶️</button>
+            </div>
+            <div class="control-row">
+                <button id="btn-drop" class="ctrl-btn hard-drop">HARD DROP</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
