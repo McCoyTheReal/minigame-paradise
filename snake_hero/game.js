@@ -12,9 +12,10 @@ const playerNameInput = document.getElementById('player-name');
 const WORLD_SIZE = 2000;
 const MINIMAP_SIZE = 150;
 const INITIAL_LENGTH = 10;
-const SEGMENT_DISTANCE = 10;
-const BASE_SPEED = 120; // Pixels per second
-const BOOST_SPEED = 240;
+let SEGMENT_DISTANCE = 10;
+let BASE_SPEED = 120; // Pixels per second
+let BOOST_SPEED = 240;
+let GLOBAL_SCALE = 1;
 
 // State
 let isPlaying = false;
@@ -23,6 +24,7 @@ let mouse = { x: 0, y: 0 };
 let foods = [];
 let snakes = [];
 let player = null;
+let lastTime = 0;
 let audio = new GameAudio();
 
 class Snake {
@@ -94,8 +96,9 @@ class Snake {
         }
 
         // Update segments positions
+        const step = SEGMENT_DISTANCE / (this.speed / 60);
         for (let i = 0; i < this.segments.length; i++) {
-            const index = Math.floor(i * (SEGMENT_DISTANCE / (BASE_SPEED / 60)));
+            const index = Math.floor(i * step);
             if (this.path[index]) {
                 this.segments[i].x = this.path[index].x;
                 this.segments[i].y = this.path[index].y;
@@ -127,13 +130,14 @@ class Snake {
     draw() {
         if (this.isDead) return;
 
-        ctx.lineWidth = 15;
+        const baseWidth = 15 * GLOBAL_SCALE;
+        ctx.lineWidth = baseWidth;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.strokeStyle = this.color;
 
         // Draw segments as glowing lines
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 10 * GLOBAL_SCALE;
         ctx.shadowColor = this.color;
 
         ctx.beginPath();
@@ -146,8 +150,8 @@ class Snake {
 
         // Draw eyes on head
         ctx.fillStyle = '#fff';
-        const eyeSize = 4;
-        const eyeOffset = 6;
+        const eyeSize = 4 * GLOBAL_SCALE;
+        const eyeOffset = 6 * GLOBAL_SCALE;
         const head = this.segments[0];
 
         // Left eye
@@ -170,9 +174,9 @@ class Snake {
 
         // Draw Name
         ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.font = '10px Arial';
+        ctx.font = `${10 * GLOBAL_SCALE}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText(this.name, head.x - camera.x, head.y - camera.y - 20);
+        ctx.fillText(this.name, head.x - camera.x, head.y - camera.y - (20 * GLOBAL_SCALE));
     }
 }
 
@@ -188,6 +192,19 @@ function spawnFood() {
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    // Calculate global scale (Standard is 1920x1080)
+    // On mobile, we want things to be slightly larger relative to screen
+    const baseDimension = Math.min(window.innerWidth, window.innerHeight);
+    if (window.innerWidth < 600) {
+        GLOBAL_SCALE = Math.max(0.8, baseDimension / 400);
+    } else {
+        GLOBAL_SCALE = Math.max(1, window.innerWidth / 1920);
+    }
+
+    SEGMENT_DISTANCE = 10 * GLOBAL_SCALE;
+    BASE_SPEED = 120 * GLOBAL_SCALE;
+    BOOST_SPEED = 240 * GLOBAL_SCALE;
 }
 
 function init() {
@@ -305,10 +322,10 @@ function draw() {
     // Draw foods
     foods.forEach(food => {
         ctx.fillStyle = food.color;
-        ctx.shadowBlur = 5;
+        ctx.shadowBlur = 5 * GLOBAL_SCALE;
         ctx.shadowColor = food.color;
         ctx.beginPath();
-        ctx.arc(food.x - camera.x, food.y - camera.y, food.size, 0, Math.PI * 2);
+        ctx.arc(food.x - camera.x, food.y - camera.y, food.size * GLOBAL_SCALE, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
     });
@@ -354,7 +371,8 @@ function startGame() {
     isPlaying = true;
     audio.start();
     init();
-    update();
+    lastTime = performance.now(); // Initialize lastTime here
+    update(lastTime);
 }
 
 function gameOver() {
