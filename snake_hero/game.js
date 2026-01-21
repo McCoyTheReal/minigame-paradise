@@ -13,8 +13,8 @@ const WORLD_SIZE = 2000;
 const MINIMAP_SIZE = 150;
 const INITIAL_LENGTH = 10;
 const SEGMENT_DISTANCE = 10;
-const BASE_SPEED = 3;
-const BOOST_SPEED = 6;
+const BASE_SPEED = 120; // Pixels per second
+const BOOST_SPEED = 240;
 
 // State
 let isPlaying = false;
@@ -49,7 +49,7 @@ class Snake {
         this.isDead = false;
     }
 
-    update() {
+    update(deltaTime) {
         if (this.isDead) return;
 
         // Speed logic
@@ -66,36 +66,36 @@ class Snake {
 
         // Direction logic
         if (this.isPlayer) {
-            // Follow mouse
-            const targetAngle = Math.atan2(mouse.y - canvas.height / 2, mouse.x - canvas.width / 2);
+            // Use window size for centering logic
+            const targetAngle = Math.atan2(mouse.y - window.innerHeight / 2, mouse.x - window.innerWidth / 2);
             let diff = targetAngle - this.angle;
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
-            this.angle += diff * 0.1;
+
+            this.angle += diff * 0.07 * (60 * deltaTime / 1000);
         } else {
             // AI simple wandering/food targeting
-            this.updateAI();
+            this.updateAI(deltaTime);
         }
 
-        // Move head
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
+        // Move head (frame rate independent)
+        const moveDist = this.speed * (deltaTime / 1000);
+        this.x += Math.cos(this.angle) * moveDist;
+        this.y += Math.sin(this.angle) * moveDist;
 
         // Boundary check
-        if (this.x < 0) this.x = 0;
-        if (this.x > WORLD_SIZE) this.x = WORLD_SIZE;
-        if (this.y < 0) this.y = 0;
-        if (this.y > WORLD_SIZE) this.y = WORLD_SIZE;
+        this.x = Math.max(0, Math.min(this.x, WORLD_SIZE));
+        this.y = Math.max(0, Math.min(this.y, WORLD_SIZE));
 
         // Path buffer for trailing
         this.path.unshift({ x: this.x, y: this.y });
-        if (this.path.length > this.segments.length * 10) {
+        if (this.path.length > this.segments.length * 20) {
             this.path.pop();
         }
 
         // Update segments positions
         for (let i = 0; i < this.segments.length; i++) {
-            const index = i * Math.floor(SEGMENT_DISTANCE / this.speed);
+            const index = Math.floor(i * (SEGMENT_DISTANCE / (BASE_SPEED / 60)));
             if (this.path[index]) {
                 this.segments[i].x = this.path[index].x;
                 this.segments[i].y = this.path[index].y;
@@ -103,7 +103,7 @@ class Snake {
         }
     }
 
-    updateAI() {
+    updateAI(deltaTime) {
         // Occasionally change direction
         if (Math.random() < 0.02) {
             this.targetAngle = Math.random() * Math.PI * 2;
@@ -120,7 +120,7 @@ class Snake {
             let diff = this.targetAngle - this.angle;
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
-            this.angle += diff * 0.05;
+            this.angle += diff * 0.05 * (60 * deltaTime / 1000);
         }
     }
 
@@ -210,12 +210,11 @@ function init() {
     }
 }
 
-function update() {
+function update(time = 0) {
     if (!isPlaying) return;
 
-    // Follow player with camera
-    camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1;
-    camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1;
+    const deltaTime = time - lastTime;
+    lastTime = time;
 
     // Boundary limit for camera
     camera.x = Math.max(0, Math.min(camera.x, WORLD_SIZE - canvas.width));
@@ -223,7 +222,7 @@ function update() {
 
     snakes.forEach(snake => {
         if (snake.isDead) return;
-        snake.update();
+        snake.update(deltaTime);
 
         // Food collision
         for (let i = foods.length - 1; i >= 0; i--) {
@@ -269,6 +268,10 @@ function update() {
             }
         });
     });
+
+    // Follow player with camera (use deltaTime)
+    camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1 * (60 * deltaTime / 1000);
+    camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1 * (60 * deltaTime / 1000);
 
     updateLeaderboard();
     draw();
@@ -374,8 +377,8 @@ window.addEventListener('mouseup', () => { if (player) player.isBoosting = false
 startBtn.addEventListener('click', startGame);
 window.addEventListener('resize', resize);
 
-// Mobile touch handling
-canvas.addEventListener('touchstart', (e) => {
+// Mobile touch handling - Use window to ensure capture
+window.addEventListener('touchstart', (e) => {
     if (e.touches && e.touches[0]) {
         mouse.x = e.touches[0].clientX;
         mouse.y = e.touches[0].clientY;
@@ -383,15 +386,16 @@ canvas.addEventListener('touchstart', (e) => {
     if (player) player.isBoosting = true;
 }, { passive: false });
 
-canvas.addEventListener('touchmove', (e) => {
+window.addEventListener('touchmove', (e) => {
     if (e.touches && e.touches[0]) {
         mouse.x = e.touches[0].clientX;
         mouse.y = e.touches[0].clientY;
     }
-    e.preventDefault(); // Prevent scrolling while playing
+    // Only prevent default if playing to allow UI interaction in overlay
+    if (isPlaying) e.preventDefault();
 }, { passive: false });
 
-canvas.addEventListener('touchend', () => {
+window.addEventListener('touchend', () => {
     if (player) player.isBoosting = false;
 });
 
