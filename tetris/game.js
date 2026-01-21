@@ -12,12 +12,19 @@ const startBtn = document.getElementById('start-btn');
 // Constants
 const ROWS = 20;
 const COLS = 10;
-const BLOCK_SIZE = 25; // Adjusted for mobile-first
+let BLOCK_SIZE = 25;
 
-canvas.width = COLS * BLOCK_SIZE;
-canvas.height = ROWS * BLOCK_SIZE;
-nextCanvas.width = 4 * BLOCK_SIZE;
-nextCanvas.height = 4 * BLOCK_SIZE;
+function resize() {
+    const availableHeight = window.innerHeight - 250; // Account for header and controls
+    BLOCK_SIZE = Math.min(25, Math.floor(availableHeight / ROWS));
+
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
+    nextCanvas.width = 4 * BLOCK_SIZE;
+    nextCanvas.height = 4 * BLOCK_SIZE;
+}
+
+resize();
 
 const COLORS = [
     null,
