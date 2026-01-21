@@ -232,6 +232,13 @@ function init() {
     player = new Snake(Date.now(), playerNameInput.value || "Player", "#39d353", true);
     snakes.push(player);
 
+    // Show/Hide mobile controls based on touch support
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) {
+        joystickContainer.classList.remove('hidden');
+        boostBtn.classList.remove('hidden');
+    }
+
     // Create AI bots
     const names = ["BotMaster", "Slither", "Neon", "FastOne", "Ghost", "Hungry", "Shadow"];
     const colors = ["#00f2ff", "#ff00ff", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c"];
