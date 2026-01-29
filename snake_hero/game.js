@@ -120,23 +120,86 @@ class Snake {
     }
 
     updateAI(deltaTime) {
-        // Occasionally change direction
-        if (Math.random() < 0.02) {
-            this.targetAngle = Math.random() * Math.PI * 2;
+        // 1. Obstacle Avoidance (Highest priority)
+        const lookAheadDist = 150 * GLOBAL_SCALE;
+        const checkPoints = [0, 0.4, -0.4, 0.8, -0.8]; // Angles to check
+        let bestScore = -Infinity;
+        let chosenAngle = this.angle;
+        let dangerDetected = false;
+
+        for (const relAngle of checkPoints) {
+            const scanAngle = this.angle + relAngle;
+            const scanX = this.x + Math.cos(scanAngle) * lookAheadDist;
+            const scanY = this.y + Math.sin(scanAngle) * lookAheadDist;
+
+            let score = 0;
+
+            // Danger: Walls
+            if (scanX < 50 || scanX > WORLD_SIZE - 50 || scanY < 50 || scanY > WORLD_SIZE - 50) {
+                score -= 1000;
+                dangerDetected = true;
+            }
+
+            // Danger: Other snakes
+            snakes.forEach(other => {
+                if (other.isDead) return;
+                other.segments.forEach((seg, idx) => {
+                    // Skip head of self
+                    if (other.id === this.id && idx < 5) return;
+
+                    const dx = scanX - seg.x;
+                    const dy = scanY - seg.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < 40 * GLOBAL_SCALE) {
+                        score -= 500;
+                        dangerDetected = true;
+                    }
+                });
+            });
+
+            if (score > bestScore) {
+                bestScore = score;
+                chosenAngle = scanAngle;
+            }
         }
 
-        // Face boundaries
-        const margin = 100;
-        if (this.x < margin) this.targetAngle = 0;
-        else if (this.x > WORLD_SIZE - margin) this.targetAngle = Math.PI;
-        else if (this.y < margin) this.targetAngle = Math.PI / 2;
-        else if (this.y > WORLD_SIZE - margin) this.targetAngle = -Math.PI / 2;
+        // 2. Food Hunting (If no immediate danger)
+        if (!dangerDetected) {
+            let nearestFood = null;
+            let minDist = 300 * GLOBAL_SCALE; // Sensing radius
 
-        if (this.targetAngle !== undefined) {
-            let diff = this.targetAngle - this.angle;
-            while (diff < -Math.PI) diff += Math.PI * 2;
-            while (diff > Math.PI) diff -= Math.PI * 2;
-            this.angle += diff * 0.05 * (60 * deltaTime / 1000);
+            foods.forEach(food => {
+                const dx = food.x - this.x;
+                const dy = food.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestFood = food;
+                }
+            });
+
+            if (nearestFood) {
+                const angleToFood = Math.atan2(nearestFood.y - this.y, nearestFood.x - this.x);
+                let diff = angleToFood - this.angle;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                this.angle += diff * 0.1 * (60 * deltaTime / 1000);
+
+                // Boost if food is very close and bot is not too short
+                this.isBoosting = (minDist < 100 && this.segments.length > 15);
+                return; // Prioritize food targeting
+            }
+        }
+
+        // 3. Fallback: Apply avoidance or wander
+        this.isBoosting = false;
+        let diff = chosenAngle - this.angle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        this.angle += diff * 0.1 * (60 * deltaTime / 1000);
+
+        // Small random wander if everything is safe
+        if (!dangerDetected && Math.random() < 0.01) {
+            this.angle += (Math.random() - 0.5) * 0.5;
         }
     }
 
@@ -240,11 +303,17 @@ function init() {
     }
 
     // Create AI bots
-    const names = ["BotMaster", "Slither", "Neon", "FastOne", "Ghost", "Hungry", "Shadow"];
-    const colors = ["#00f2ff", "#ff00ff", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c"];
     for (let i = 0; i < 10; i++) {
-        snakes.push(new Snake(i, names[i % names.length], colors[i % colors.length]));
+        spawnBot();
     }
+}
+
+function spawnBot() {
+    const names = ["BotMaster", "Slither", "Neon", "FastOne", "Ghost", "Hungry", "Shadow", "Hunter", "Swift", "Cobra"];
+    const colors = ["#00f2ff", "#ff00ff", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c"];
+    const name = names[Math.floor(Math.random() * names.length)];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    snakes.push(new Snake(Date.now() + Math.random(), name, color));
 }
 
 function update(time = 0) {
@@ -305,6 +374,12 @@ function update(time = 0) {
             }
         });
     });
+
+    // Respawn Bots
+    const activeBots = snakes.filter(s => !s.isPlayer && !s.isDead).length;
+    if (isPlaying && activeBots < 10) {
+        spawnBot();
+    }
 
     // Follow player with camera (use deltaTime)
     camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1 * (60 * deltaTime / 1000);

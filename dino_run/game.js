@@ -29,6 +29,7 @@ let dino = {
     isJumping: false,
     grounded: false,
     jumpCount: 0,
+    isCrouching: false,
     icon: '🦖'
 };
 
@@ -47,13 +48,16 @@ function spawnObstacle() {
         if (canvas.width - lastObs.x < 300) return;
     }
 
-    const type = Math.random() > 0.5 ? '🌵' : '🌴';
+    const isFlying = Math.random() > 0.7; // 30% chance for Pterodactyl
+    const type = isFlying ? '🦅' : (Math.random() > 0.5 ? '🌵' : '🌴');
+
     obstacles.push({
         x: canvas.width,
-        y: canvas.height - 45, // Ground - height
+        y: isFlying ? canvas.height - 90 : canvas.height - 45, // Flying height vs Ground
         w: 30,
-        h: 40,
+        h: isFlying ? 30 : 40,
         type: type,
+        isFlying: isFlying,
         passed: false
     });
 }
@@ -91,9 +95,16 @@ function update() {
     // Draw Dino (Flipped to face right)
     ctx.save();
     ctx.font = '40px serif';
-    ctx.translate(dino.x + 40, dino.y); // Move to the dino's right edge
-    ctx.scale(-1, 1); // Flip horizontally
-    ctx.fillText(dino.icon, 0, 40);
+
+    if (dino.isCrouching) {
+        ctx.translate(dino.x + 40, dino.y + 20); // Lower rendering
+        ctx.scale(-1, 0.6); // Squish vertically
+        ctx.fillText(dino.icon, 0, 40);
+    } else {
+        ctx.translate(dino.x + 40, dino.y);
+        ctx.scale(-1, 1);
+        ctx.fillText(dino.icon, 0, 40);
+    }
     ctx.restore();
 
     // Obstacles
@@ -111,11 +122,16 @@ function update() {
         ctx.fillText(obs.type, obs.x, obs.y + 40);
 
         // Collision (Slightly more forgiving hitboxes)
+        // Collision (Slightly more forgiving hitboxes)
+        // Adjust dino hitbox when crouching
+        const dinoH = dino.isCrouching ? 20 : dino.h;
+        const dinoY = dino.isCrouching ? dino.y + 20 : dino.y;
+
         if (
             dino.x + 10 < obs.x + obs.w - 10 &&
             dino.x + dino.w - 15 > obs.x &&
-            dino.y + 10 < obs.y + obs.h - 10 &&
-            dino.y + dino.h - 10 > obs.y
+            dinoY + 10 < obs.y + obs.h - 10 &&
+            dinoY + dinoH - 10 > obs.y
         ) {
             gameOver();
         }
@@ -142,6 +158,15 @@ function jump() {
         dino.grounded = false;
         dino.jumpCount++;
         audio.jump();
+    }
+}
+
+function crouch(state) {
+    if (!isPlaying) return;
+    dino.isCrouching = state;
+    // Fast fall if crouching in air
+    if (state && !dino.grounded) {
+        dino.dy += 5;
     }
 }
 
@@ -174,15 +199,29 @@ function resetGame() {
 
 // Input
 window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
         if (isPlaying) jump();
-        else if (!overlay.classList.contains('hidden')) resetGame(); // Quick restart
+        else if (!overlay.classList.contains('hidden')) resetGame();
+    }
+    if (e.code === 'ArrowDown') {
+        crouch(true);
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowDown') {
+        crouch(false);
     }
 });
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    if (isPlaying) jump();
+    if (isPlaying) {
+        // Simple touch logic: Top half jump, bottom half crouch (tap to toggle or hold not easy without UI)
+        // For now, simple jump on top, crouch on bottom area? 
+        // Let's stick to Jump on tap, maybe swipe down later. Simpler: Tap = Jump.
+        jump();
+    }
 });
 
 startBtn.addEventListener('click', resetGame);

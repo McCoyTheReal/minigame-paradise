@@ -236,6 +236,84 @@ main {
     filter: grayscale(1);
 }
 
+/* Items Panel */
+#items-panel {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.item-slot {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+}
+
+/* Action Area Updates */
+.enhance-controls {
+    display: flex;
+    gap: 10px;
+}
+
+#enhance-btn {
+    flex: 2;
+    background: linear-gradient(to bottom, #f1c40f, #f39c12);
+    color: #4b2c00;
+    box-shadow: 0 4px 0 #d35400;
+}
+
+#auto-btn {
+    flex: 1;
+    background: linear-gradient(to bottom, #3498db, #2980b9);
+    color: #fff;
+    box-shadow: 0 4px 0 #1a5276;
+}
+
+#auto-btn.active {
+    background: linear-gradient(to bottom, #e74c3c, #c0392b);
+    box-shadow: 0 4px 0 #922b21;
+    animation: pulse 1s infinite;
+}
+
+#shop-area {
+    display: flex;
+    gap: 10px;
+}
+
+.shop-btn {
+    flex: 1;
+    background: #555;
+    color: #fff;
+    font-size: 13px;
+    padding: 10px;
+    box-shadow: 0 4px 0 #333;
+}
+
+.shop-btn:active:not(.disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #333;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 .icon-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;

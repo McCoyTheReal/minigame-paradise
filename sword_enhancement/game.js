@@ -14,33 +14,22 @@ const sellBtn = document.getElementById('sell-btn');
 const restartBtn = document.getElementById('restart-btn');
 const overlay = document.getElementById('overlay');
 
-// Game State
-let gold = 5000; // Increased starting gold
-let currentSword = null; // { level: 0, name: 'Twig' }
-let isEnhancing = false;
-const audio = new GameAudio();
+// Shop & Items
+let protectionScrolls = 0;
+let luckyCharms = 0;
+let isAuto = false;
 
-const SWORD_DATA = [
-    { level: 0, icon: '🎋', name: 'Twig' },
-    { level: 3, icon: '🪵', name: 'Wooden Sword' },
-    { level: 6, icon: '🗡️', name: 'Dagger' },
-    { level: 9, icon: '⚔️', name: 'Iron Sword' },
-    { level: 12, icon: '🤺', name: 'Knight Sword' },
-    { level: 15, icon: '🔱', name: 'Greatsword' },
-    { level: 18, icon: '🔮', name: 'Magic Blade' },
-    { level: 20, icon: '💎', name: 'Godly Blade' }
-];
-
-function getSwordInfo(level) {
-    let best = SWORD_DATA[0];
-    for (let data of SWORD_DATA) {
-        if (level >= data.level) best = data;
-    }
-    return best;
-}
+// Elements
+const autoBtn = document.getElementById('auto-btn');
+const scrollCountEl = document.getElementById('scroll-count');
+const charmCountEl = document.getElementById('charm-count');
+const buyScrollBtn = document.getElementById('buy-scroll-btn');
+const buyCharmBtn = document.getElementById('buy-charm-btn');
 
 function updateUI() {
     goldEl.innerText = gold.toLocaleString();
+    scrollCountEl.innerText = protectionScrolls;
+    charmCountEl.innerText = luckyCharms;
 
     if (currentSword) {
         const info = getSwordInfo(currentSword.level);
@@ -59,8 +48,14 @@ function updateUI() {
             swordIcon.style.filter = 'none';
         }
 
-        const successProb = getSuccessRate(currentSword.level);
-        successRateEl.innerText = `${Math.round(successProb * 100)}%`;
+        let successProb = getSuccessRate(currentSword.level);
+        // Visual indicator for Lucky Charm
+        if (luckyCharms > 0) {
+            successProb = Math.min(1.0, successProb + 0.1);
+            successRateEl.innerHTML = `${Math.round(successProb * 100)}% <span style="color:#f1c40f; font-size:12px;">(+10%)</span>`;
+        } else {
+            successRateEl.innerText = `${Math.round(successProb * 100)}%`;
+        }
 
         const nextCost = getEnhanceCost(currentSword.level);
         enhanceCostEl.innerText = `(${nextCost.toLocaleString()}G)`;
@@ -69,15 +64,19 @@ function updateUI() {
         sellPriceEl.innerText = `${sellPrice.toLocaleString()}G`;
 
         enhanceBtn.classList.remove('disabled');
+        autoBtn.classList.remove('disabled');
         sellBtn.classList.remove('disabled');
         buyBtn.classList.add('disabled');
 
         if (currentSword.level >= 20) {
             enhanceBtn.classList.add('disabled');
+            autoBtn.classList.add('disabled');
+            stopAuto();
             enhanceCostEl.innerText = '(MAX)';
             successRateEl.innerText = 'MAX';
         }
     } else {
+        stopAuto();
         swordIcon.innerText = '💨';
         swordName.innerText = 'No Equipment';
         swordLevel.innerText = '';
@@ -85,43 +84,23 @@ function updateUI() {
         successRateEl.innerText = '-%';
         sellPriceEl.innerText = '0G';
         enhanceBtn.classList.add('disabled');
+        autoBtn.classList.add('disabled');
         enhanceCostEl.innerText = '';
         sellBtn.classList.add('disabled');
         buyBtn.classList.remove('disabled');
     }
 
+    // Shop Buttons
+    if (gold < 10000) buyScrollBtn.classList.add('disabled');
+    else buyScrollBtn.classList.remove('disabled');
+
+    if (gold < 5000) buyCharmBtn.classList.add('disabled');
+    else buyCharmBtn.classList.remove('disabled');
+
     // Check afford buy
     if (gold < 100 && !currentSword) {
         checkGameOver();
     }
-}
-
-function getSuccessRate(level) {
-    // 100% -> 10% decay
-    if (level < 3) return 1.0;
-    if (level < 7) return 0.8;
-    if (level < 12) return 0.5;
-    if (level < 16) return 0.3;
-    if (level < 19) return 0.15;
-    return 0.1; // 10% for the last push
-}
-
-function getEnhanceCost(level) {
-    return Math.floor(100 * Math.pow(1.5, level));
-}
-
-function getSellPrice(level) {
-    if (level === 0) return 50;
-    // Base 100, but profit kicks in after risks
-    return Math.floor(100 * Math.pow(1.8, level));
-}
-
-function addLog(msg, type = 'system') {
-    const p = document.createElement('p');
-    p.className = type;
-    p.innerText = msg;
-    logList.prepend(p);
-    if (logList.children.length > 30) logList.lastChild.remove();
 }
 
 function enhance() {
@@ -130,6 +109,7 @@ function enhance() {
     const cost = getEnhanceCost(currentSword.level);
     if (gold < cost) {
         addLog("Not enough gold!", "fail");
+        stopAuto();
         return;
     }
 
@@ -138,15 +118,24 @@ function enhance() {
     enhanceBtn.classList.add('disabled');
     audio.enhance();
 
+    // Consume Charm if available
+    let usedCharm = false;
+    if (luckyCharms > 0) {
+        luckyCharms--;
+        usedCharm = true;
+    }
+
     // Animation
     swordIcon.classList.add('shaking');
-    addLog(`Enhancing... (-${cost}G)`);
+    addLog(`Enhancing... (-${cost}G)${usedCharm ? ' [Charm Used]' : ''}`);
 
     setTimeout(() => {
         swordIcon.classList.remove('shaking');
         isEnhancing = false;
 
-        const rate = getSuccessRate(currentSword.level);
+        let rate = getSuccessRate(currentSword.level);
+        if (usedCharm) rate += 0.1;
+
         if (Math.random() < rate) {
             // Success
             currentSword.level++;
@@ -154,17 +143,68 @@ function enhance() {
             audio.success();
         } else {
             // Failure
-            if (Math.random() < 0.7) { // 70% Destruction
+            let destroyed = false;
+            if (Math.random() < 0.7) destroyed = true; // 70% Destruction chance
+
+            // Check Protection Scroll
+            if (destroyed && protectionScrolls > 0) {
+                protectionScrolls--;
+                destroyed = false;
+                addLog(`[DEFEND] Scroll prevented destruction!`, "success");
+                audio.success(); // Re-use distinct sound if possible
+            }
+
+            if (destroyed) {
                 addLog(`[FAIL] The sword was destroyed!`, "fail");
                 currentSword = null;
+                stopAuto();
                 audio.destroy();
-            } else { // 30% Protection
-                addLog(`[FAIL] Enhancement failed, but the item was saved.`, "system");
+            } else {
+                addLog(`[FAIL] Enhancement failed.`, "system");
                 audio.fail();
             }
         }
         updateUI();
-    }, 800);
+        if (isAuto) {
+            setTimeout(enhance, 200);
+        }
+    }, 800); // 0.8s Enhancement time
+}
+
+function toggleAuto() {
+    if (isAuto) {
+        stopAuto();
+    } else {
+        if (!currentSword) return;
+        isAuto = true;
+        autoBtn.classList.add('active');
+        autoBtn.innerText = "STOP";
+        enhance();
+    }
+}
+
+function stopAuto() {
+    isAuto = false;
+    autoBtn.classList.remove('active');
+    autoBtn.innerText = "AUTO";
+}
+
+function buyItem(type) {
+    if (type === 'scroll') {
+        if (gold >= 10000) {
+            gold -= 10000;
+            protectionScrolls++;
+            addLog("Bought Protection Scroll!");
+        }
+    } else if (type === 'charm') {
+        if (gold >= 5000) {
+            gold -= 5000;
+            luckyCharms++;
+            addLog("Bought Lucky Charm!");
+        }
+    }
+    audio.money();
+    updateUI();
 }
 
 function buyTwig() {
@@ -182,6 +222,7 @@ function sellSword() {
     gold += price;
     addLog(`Sold +${currentSword.level} for ${price}G!`, "success");
     currentSword = null;
+    stopAuto();
     audio.money();
     updateUI();
 }
@@ -195,6 +236,9 @@ function checkGameOver() {
 function restart() {
     gold = 5000;
     currentSword = null;
+    protectionScrolls = 0;
+    luckyCharms = 0;
+    stopAuto();
     logList.innerHTML = '<p class="system">Buy a +0 Twig to start!</p>';
     overlay.classList.add('hidden');
     updateUI();
@@ -202,8 +246,12 @@ function restart() {
 
 // Events
 enhanceBtn.addEventListener('click', enhance);
+autoBtn.addEventListener('click', toggleAuto);
+buyScrollBtn.addEventListener('click', () => buyItem('scroll'));
+buyCharmBtn.addEventListener('click', () => buyItem('charm'));
 buyBtn.addEventListener('click', buyTwig);
 sellBtn.addEventListener('click', sellSword);
 restartBtn.addEventListener('click', restart);
 
 updateUI();
+

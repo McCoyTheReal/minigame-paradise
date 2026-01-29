@@ -31,6 +31,7 @@
                 </div>
             </div>
 
+
             <div id="stats-panel">
                 <div class="stat">
                     <span class="label">Success:</span>
@@ -49,8 +50,29 @@
             </div>
         </main>
 
+        <!-- Items Display -->
+        <div id="items-panel">
+            <div class="item-slot" title="Protects from destruction (10,000G)">
+                <span class="item-icon">📜</span>
+                <span id="scroll-count">0</span>
+            </div>
+            <div class="item-slot" title="Increases success rate by 10% (5,000G)">
+                <span class="item-icon">🍀</span>
+                <span id="charm-count">0</span>
+            </div>
+        </div>
+
         <div id="action-area">
-            <button id="enhance-btn" class="game-btn disabled">ENHANCE <span id="enhance-cost"></span></button>
+            <div class="enhance-controls">
+                <button id="enhance-btn" class="game-btn disabled">ENHANCE <span id="enhance-cost"></span></button>
+                <button id="auto-btn" class="game-btn disabled">AUTO</button>
+            </div>
+
+            <div id="shop-area">
+                <button id="buy-scroll-btn" class="game-btn shop-btn">BUY 📜 (10k)</button>
+                <button id="buy-charm-btn" class="game-btn shop-btn">BUY 🍀 (5k)</button>
+            </div>
+
             <div id="sub-actions">
                 <button id="buy-btn" class="game-btn secondary">BUY TWIG (100G)</button>
                 <button id="sell-btn" class="game-btn secondary disabled">SELL</button>

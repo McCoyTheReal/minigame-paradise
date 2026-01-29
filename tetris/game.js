@@ -2,6 +2,8 @@ const canvas = document.getElementById('tetris-canvas');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
 const nCtx = nextCanvas.getContext('2d');
+const holdCanvas = document.getElementById('hold-canvas');
+const hCtx = holdCanvas.getContext('2d');
 
 const scoreEl = document.getElementById('score-val');
 const linesEl = document.getElementById('lines-val');
@@ -20,8 +22,11 @@ function resize() {
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
     nextCanvas.width = 4 * BLOCK_SIZE;
     nextCanvas.height = 4 * BLOCK_SIZE;
+    holdCanvas.width = 4 * BLOCK_SIZE;
+    holdCanvas.height = 4 * BLOCK_SIZE;
 }
 
 resize();
@@ -56,7 +61,11 @@ let player = {
     score: 0,
     lines: 0,
     level: 1,
-    next: null
+    lines: 0,
+    level: 1,
+    next: null,
+    hold: null,
+    canHold: true,
 };
 
 let dropCounter = 0;
@@ -133,6 +142,18 @@ function drawNext() {
     drawMatrix(player.next, offset, nCtx);
 }
 
+function drawHold() {
+    hCtx.fillStyle = '#000';
+    hCtx.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
+    if (!player.hold) return;
+
+    const offset = { x: 1, y: 1 };
+    if (player.hold.length === 2) { offset.x = 1; offset.y = 1; } // O
+    if (player.hold.length === 4) { offset.x = 0; offset.y = 0; } // I
+
+    drawMatrix(player.hold, offset, hCtx);
+}
+
 function collide(board, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
@@ -178,7 +199,32 @@ function playerDrop() {
         arenaSweep();
         updateScore();
     }
-    dropCounter = 0;
+    updateScore();
+}
+dropCounter = 0;
+}
+
+function playerHold() {
+    if (!player.canHold) return;
+
+    if (!player.hold) {
+        player.hold = player.matrix;
+        playerReset();
+        // Logic fix: playerReset usually generates a new piece for matrix from next.
+        // We need to swap hold <-> matrix accurately.
+        // But since playerReset pulls from next, a simple hold=matrix then reset is fine for first hold.
+    } else {
+        const temp = player.matrix;
+        player.matrix = player.hold;
+        player.hold = temp;
+
+        // Reset position for the swapped in piece
+        player.pos.y = 0;
+        player.pos.x = (COLS / 2 | 0) - (player.matrix[0].length / 2 | 0);
+    }
+
+    player.canHold = false;
+    drawHold();
 }
 
 function playerHardDrop() {
@@ -228,7 +274,10 @@ function playerReset() {
     player.pos.y = 0;
     player.pos.x = (COLS / 2 | 0) - (player.matrix[0].length / 2 | 0);
 
+    player.canHold = true; // Reset hold ability on new piece
+
     drawNext();
+    drawHold();
 
     if (collide(board, player)) {
         board.forEach(row => row.fill(0));
@@ -306,6 +355,7 @@ document.addEventListener('keydown', event => {
     else if (event.keyCode === 40) playerDrop();
     else if (event.keyCode === 38) playerRotate(1);
     else if (event.keyCode === 32) playerHardDrop();
+    else if (event.keyCode === 67 || event.keyCode === 16) playerHold(); // C or Shift
 });
 
 // Mobile Controls
@@ -314,6 +364,10 @@ document.getElementById('btn-right').addEventListener('click', () => playerMove(
 document.getElementById('btn-down').addEventListener('click', () => playerDrop());
 document.getElementById('btn-rotate').addEventListener('click', () => playerRotate(1));
 document.getElementById('btn-drop').addEventListener('click', () => playerHardDrop());
+document.getElementById('start-btn').addEventListener('click', () => { // Quick hold button hack for mobile if needed, or add new UI
+    if (isPlaying) playerHold();
+    else startGame();
+});
 
 startBtn.addEventListener('click', startGame);
 
