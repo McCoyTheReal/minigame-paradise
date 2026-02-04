@@ -186,6 +186,39 @@ header {
     box-shadow: 0 0 20px var(--neon-blue);
 }
 
+/* Pause Menu Buttons */
+#resume-btn, #quit-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Bungee', cursive;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 15px;
+}
+
+#resume-btn {
+    background: var(--neon-green);
+    color: #000;
+}
+
+#resume-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--neon-green);
+}
+
+#quit-btn {
+    background: #e74c3c;
+    color: #fff;
+}
+
+#quit-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #e74c3c;
+}
+
 /* Virtual Controls for Mobile */
 #joystick-container {
     position: absolute;

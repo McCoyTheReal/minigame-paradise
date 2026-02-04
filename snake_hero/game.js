@@ -7,6 +7,9 @@ const leaderList = document.getElementById('leader-list');
 const overlay = document.getElementById('overlay');
 const startBtn = document.getElementById('start-btn');
 const playerNameInput = document.getElementById('player-name');
+const pauseOverlay = document.getElementById('pause-overlay');
+const pauseBtn = document.getElementById('pause-btn');
+const resumeBtn = document.getElementById('resume-btn');
 
 // Game Constants
 const WORLD_SIZE = 2000;
@@ -19,6 +22,7 @@ let GLOBAL_SCALE = 1;
 
 // State
 let isPlaying = false;
+let isPaused = false;
 let camera = { x: 0, y: 0 };
 let mouse = { x: 0, y: 0 };
 let foods = [];
@@ -318,6 +322,7 @@ function spawnBot() {
 
 function update(time = 0) {
     if (!isPlaying) return;
+    if (isPaused) return;
 
     const deltaTime = time - lastTime;
     lastTime = time;
@@ -489,6 +494,28 @@ window.addEventListener('mouseup', () => { if (player) player.isBoosting = false
 
 startBtn.addEventListener('click', startGame);
 window.addEventListener('resize', resize);
+
+function togglePause() {
+    if (!isPlaying) return;
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        pauseOverlay.classList.remove('hidden');
+    } else {
+        pauseOverlay.classList.add('hidden');
+        lastTime = performance.now();
+        requestAnimationFrame(update);
+    }
+}
+
+pauseBtn.addEventListener('click', togglePause);
+resumeBtn.addEventListener('click', togglePause);
+
+window.addEventListener('keydown', e => {
+    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        if (isPlaying) togglePause();
+    }
+});
 
 // Joystick Logic
 function handleJoystick(e) {

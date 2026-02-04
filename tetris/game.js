@@ -72,6 +72,7 @@ let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 let isGameOver = false;
+let isPlaying = false;
 let audio = new GameAudio();
 
 function createMatrix(w, h) {
@@ -197,11 +198,9 @@ function playerDrop() {
         merge(board, player);
         playerReset();
         arenaSweep();
-        updateScore();
     }
+    dropCounter = 0;
     updateScore();
-}
-dropCounter = 0;
 }
 
 function playerHold() {
@@ -282,6 +281,7 @@ function playerReset() {
     if (collide(board, player)) {
         board.forEach(row => row.fill(0));
         isGameOver = true;
+        isPlaying = false;
         audio.gameOver();
         overlay.classList.remove('hidden');
     }
@@ -338,6 +338,7 @@ function startGame() {
     player.level = 1;
     player.next = null;
     isGameOver = false;
+    isPlaying = true;
     dropInterval = 1000;
     lastTime = 0;
     overlay.classList.add('hidden');
@@ -368,8 +369,6 @@ document.getElementById('start-btn').addEventListener('click', () => { // Quick 
     if (isPlaying) playerHold();
     else startGame();
 });
-
-startBtn.addEventListener('click', startGame);
 
 // Init
 drawNext();
