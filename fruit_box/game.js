@@ -31,6 +31,11 @@ let timeLeft = TIME_LIMIT;
 let timerInterval = null;
 let isGameOver = false;
 
+// Combo System
+let combo = 0;
+let lastMatchTime = 0;
+let comboTexts = []; // {x, y, text, life}
+
 // Setup
 function init() {
     resizeCanvas();
@@ -75,6 +80,8 @@ function init() {
 
 function startNewGame() {
     score = 0;
+    combo = 0;
+    lastMatchTime = 0;
     updateScore(0);
     timeLeft = TIME_LIMIT;
     isGameOver = false;
@@ -264,6 +271,20 @@ function loop() {
         ctx.globalAlpha = 1.0;
     }
 
+    // Draw Combo Texts
+    if (comboTexts) {
+        for (let i = comboTexts.length - 1; i >= 0; i--) {
+            const ct = comboTexts[i];
+            ctx.fillStyle = `rgba(255, 215, 0, ${ct.life})`;
+            ctx.font = `bold ${size * 0.8}px 'Fredoka One'`;
+            ctx.textAlign = 'center';
+            ctx.fillText(ct.text, ct.x, ct.y);
+            ct.y -= 2; // Float up
+            ct.life -= 0.02;
+            if (ct.life <= 0) comboTexts.splice(i, 1);
+        }
+    }
+
     requestAnimationFrame(loop);
 }
 
@@ -300,11 +321,40 @@ function checkMatch() {
             }
         }
         if (count > 0) {
-            updateScore(score + count);
+            // Combo Logic
+            const now = Date.now();
+            if (now - lastMatchTime < 2500) { // 2.5 seconds window
+                combo++;
+            } else {
+                combo = 1;
+            }
+            lastMatchTime = now;
+
+            // Score Calculation
+            const basePoints = count;
+            const comboBonus = (combo - 1) * 5;
+            const points = basePoints + comboBonus;
+
+            updateScore(score + points);
             gameAudio.playMatch();
+
+            // Floating Text
+            if (combo > 1) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (minCol * canvas.scale + (maxCol - minCol + 1) * canvas.scale / 2);
+                const y = (minRow * canvas.scale);
+                comboTexts.push({
+                    x: x,
+                    y: y,
+                    text: `${combo} COMBO!`,
+                    life: 1.0
+                });
+            }
+
             checkClear();
         }
     } else {
+        combo = 0; // Reset combo on mistake
         gameAudio.playError();
     }
 }

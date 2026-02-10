@@ -34,11 +34,21 @@ let dino = {
 };
 
 let obstacles = [];
+let clouds = [];
 
 function resize() {
     canvas.width = Math.min(window.innerWidth - 40, 800);
     canvas.height = 300;
     dino.y = canvas.height - 50; // Ground level
+}
+
+function spawnCloud() {
+    clouds.push({
+        x: canvas.width,
+        y: Math.random() * (canvas.height / 2),
+        speed: (Math.random() * 0.5 + 0.5) * 0.5, // Slower than game speed
+        size: Math.random() * 20 + 20
+    });
 }
 
 function spawnObstacle() {
@@ -68,6 +78,23 @@ function update() {
     frame++;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw Clouds (Background)
+    if (frame % 200 === 0 && Math.random() > 0.5) spawnCloud();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    for (let i = clouds.length - 1; i >= 0; i--) {
+        let c = clouds[i];
+        c.x -= c.speed;
+
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+        ctx.arc(c.x + c.size * 0.5, c.y - c.size * 0.2, c.size * 0.8, 0, Math.PI * 2);
+        ctx.arc(c.x + c.size, c.y, c.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (c.x < -100) clouds.splice(i, 1);
+    }
 
     // Ground Line
     ctx.beginPath();
@@ -188,12 +215,22 @@ function resetGame() {
     scoreEl.innerText = 0;
     gameSpeed = SPEED;
     obstacles = [];
+    clouds = []; // Reset clouds or keep them? Resetting is cleaner
     frame = 0;
     dino.y = canvas.height - 50;
     dino.dy = 0;
     dino.isJumping = false;
     isPlaying = true;
     overlay.classList.add('hidden');
+    // Pre-spawn some clouds
+    for(let i=0; i<3; i++) {
+        clouds.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * (canvas.height / 2),
+            speed: (Math.random() * 0.5 + 0.5) * 0.5,
+            size: Math.random() * 20 + 20
+        });
+    }
     update();
 }
 
